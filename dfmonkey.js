@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         DiceForge assistant
+// @name         DF monkey
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Hints for playing better at diceforge
