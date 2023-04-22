@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  Hints for playing better at diceforge
 // @author       Jonas
-// @match        https://boardgamearena.com/8/diceforge?table=*
+// @match        https://boardgamearena.com/*/diceforge?table=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=boardgamearena.com
 // @grant        none
 // ==/UserScript==
@@ -81,6 +81,10 @@ function process_log(log) {
         return process_log_dice_resolve(log)
     }
 
+    if(log.innerText.includes(" verliest ") ) {
+        return process_log_dice_resolve_minotaur(log)
+    }
+
     if(log.innerText.includes(" gekocht ") ) {
         return process_log_buy_card(log)
     }
@@ -114,6 +118,21 @@ function process_log_dice_resolve(log) {
         }
         if(child[i].getAttribute('alt') == "hammer") {
             add_hammer(player, value)
+        }
+    }
+
+    return true
+}
+
+function process_log_dice_resolve_minotaur(log) {
+    var components = log.innerText.split(' ')
+    var child = log.children
+    var player = components[0]
+
+    for(let i = 1; i < child.length; i++) {
+        var value = parseInt(components[2*i])
+        if(child[i].getAttribute('alt') == "vp") {
+            add_vp(player, -value)
         }
     }
 
