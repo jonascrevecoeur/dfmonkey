@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         DF monkey
+// @name         DiceForge assistant
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Hints for playing better at diceforge
 // @author       Jonas
 // @match        https://boardgamearena.com/*/diceforge?table=*
@@ -78,11 +78,11 @@ function process_log(log) {
     }
 
     if(log.innerText.includes(" krijgt ") && !log.innerText.includes(" voltooit ") ) {
-        return process_log_dice_resolve(log)
+        return process_log_dice_resolve(log, 1)
     }
 
     if(log.innerText.includes(" verliest ") ) {
-        return process_log_dice_resolve_minotaur(log)
+        return process_log_dice_resolve(log, -1)
     }
 
     if(log.innerText.includes(" gekocht ") ) {
@@ -106,15 +106,24 @@ function process_log_dice_throw(log) {
     return true
 }
 
-function process_log_dice_resolve(log) {
-    var components = log.innerText.split(' ')
+function process_log_dice_resolve(log, multiplier = 1) {
+
+    var player = null
+    var components = []
+
+    for(var i = 0; i < players.length; i++) {
+        if(log.innerText.startsWith(players[i])) {
+            player = players[i]
+            components = log.innerText.replace(players[i], 'player').split(' ')
+        }
+    }
+
     var child = log.children
-    var player = components[0]
 
     for(let i = 1; i < child.length; i++) {
         var value = parseInt(components[2*i])
         if(child[i].getAttribute('alt') == "vp") {
-            add_vp(player, value)
+            add_vp(player, value * multiplier)
         }
         if(child[i].getAttribute('alt') == "hammer") {
             add_hammer(player, value)
@@ -124,7 +133,7 @@ function process_log_dice_resolve(log) {
     return true
 }
 
-function process_log_dice_resolve_minotaur(log) {
+/*function process_log_dice_resolve_minotaur(log) {
     var components = log.innerText.split(' ')
     var child = log.children
     var player = components[0]
@@ -137,7 +146,7 @@ function process_log_dice_resolve_minotaur(log) {
     }
 
     return true
-}
+}*/
 
 function process_log_buy_card(log) {
     var player = log.children[0].innerText
