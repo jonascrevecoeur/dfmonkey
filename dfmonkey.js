@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiceForge assistant
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Hints for playing better at diceforge
 // @author       Jonas
 // @match        https://boardgamearena.com/*/diceforge?table=*
@@ -77,6 +77,10 @@ function process_log(log) {
         return process_log_activate_elder(log)
     }
 
+    if(log.innerText.includes(" activeert De Uil van de Bewaker ") ) {
+        return process_log_activate_owl(log)
+    }
+
     if(log.innerText.includes(" krijgt ") && !log.innerText.includes(" voltooit ") ) {
         return process_log_dice_resolve(log, 1)
     }
@@ -103,6 +107,22 @@ function process_log_set_active_player(log) {
 }
 
 function process_log_dice_throw(log) {
+    return true
+}
+
+function process_log_activate_owl(log) {
+    var player = null
+
+    for(var i = 0; i < players.length; i++) {
+        if(log.innerText.startsWith(players[i])) {
+            player = players[i]
+        }
+    }
+
+    if(log.children[1].getAttribute('alt') == "hammer") {
+        add_hammer(player, 1)
+    }
+
     return true
 }
 
@@ -196,7 +216,9 @@ function add_hammer(player_name, count) {
 
     var diff_score = score_hammer(hammer_current + count) - score_hammer(hammer_current)
 
+    console.log(player_name + " hamer stijgt van " + player_hammer_value[index] + " naar " + (player_hammer_value[index] + count))
     player_hammer_value[index] += count
+
     if(diff_score > 0) {
         console.log(player_name + " krijgt " + diff_score + " vp van hamer")
         add_vp(player_name, diff_score)
